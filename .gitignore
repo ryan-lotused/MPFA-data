@@ -1,6 +1,5 @@
 mpfa-fund-list/__pycache__/
 mpfa-fund-list/output/
-mpfa-fund-list/data/
 *.pyc
 __pycache__/
 *.pyo
