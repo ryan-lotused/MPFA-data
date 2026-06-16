@@ -1,0 +1,46 @@
+﻿column_name,present_in,source_count,is_unique_to_one_source
+bid_price_hkd,prices,1,True
+calendar_year_return_2021,merged_data,1,True
+calendar_year_return_2022,merged_data,1,True
+calendar_year_return_2023,merged_data,1,True
+calendar_year_return_2024,merged_data,1,True
+calendar_year_return_2025,merged_data,1,True
+class,fund_info,1,True
+constituent_fund,merged_data,1,True
+constituent_fund_sc,merged_data,1,True
+constituent_fund_tc,merged_data,1,True
+fund_code,merged_data,1,True
+fund_en,prices,1,True
+fund_id,fund_info,1,True
+fund_name_en,fund_info,1,True
+fund_name_zh,fund_info,1,True
+fund_size_hkd_m,merged_data,1,True
+fund_type,merged_data,1,True
+fund_type_en,fund_info,1,True
+fund_type_id,fund_info,1,True
+fund_type_sc,merged_data,1,True
+fund_type_tc,merged_data,1,True
+fund_type_zh,fund_info,1,True
+fund_zh,prices,1,True
+latest_fund_expense_ratio,merged_data,1,True
+launch_date,"fund_info, merged_data",2,False
+month_label,prices,1,True
+mpf_trustee,merged_data,1,True
+mpf_trustee_sc,merged_data,1,True
+mpf_trustee_tc,merged_data,1,True
+notes_en,prices,1,True
+notes_zh,prices,1,True
+offer_price_hkd,prices,1,True
+price_hkd,prices,1,True
+risk_class,merged_data,1,True
+scheme,merged_data,1,True
+scheme_en,"fund_info, prices",2,False
+scheme_id,fund_info,1,True
+scheme_sc,merged_data,1,True
+scheme_tc,merged_data,1,True
+scheme_zh,"fund_info, prices",2,False
+snapshot_date,prices,1,True
+source_file,prices,1,True
+trustee_en,"fund_info, prices",2,False
+trustee_id,fund_info,1,True
+trustee_zh,"fund_info, prices",2,False

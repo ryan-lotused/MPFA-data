@@ -1,0 +1,7 @@
+fund_info rows: 455
+combined rows: 455
+essential unique rows: 436
+missing master enrichment: 0
+missing price data: 2
+master match methods: {'en_exact': 408, 'scheme_en_plus_fund_zh': 27, '': 20}
+price match methods: {'en_exact': 408, 'scheme_en_plus_fund_zh': 27, '': 20}
