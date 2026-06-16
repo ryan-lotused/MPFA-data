@@ -2,6 +2,8 @@ name: MPFA Fund List Data
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * *"
 
 permissions:
   contents: write
@@ -28,7 +30,8 @@ jobs:
         run: python -m playwright install --with-deps chromium
 
       - name: Run MPFA Data Fetchers
-        run: python mpfa-fund-list/main.py
+        working-directory: mpfa-fund-list
+        run: python main.py
 
       - name: Publish Data Branch
         shell: bash
