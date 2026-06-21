@@ -17,18 +17,22 @@ TASKS = {
     "constituent_funds": {
         "module": constituent_funds,
         "label": "constituent funds",
+        "cleaned_row_transform": constituent_funds.clean_constituent_fund_rows,
     },
     "pooled_investment_funds": {
         "module": pooled_investment_funds,
         "label": "pooled investment funds",
+        "cleaned_row_transform": None,
     },
     "approved_itcis": {
         "module": approved_itcis,
         "label": "approved ITCIs",
+        "cleaned_row_transform": None,
     },
     "scheme_merger_records": {
         "module": scheme_merger_records,
         "label": "scheme merger records",
+        "cleaned_row_transform": None,
     },
 }
 
@@ -89,16 +93,24 @@ async def run_task(task_name: str, args: argparse.Namespace) -> None:
         logger=logger,
     )
 
-    raw_output_path, latest_output_path = save_endpoint_outputs(
+    (
+        raw_dated_output_path,
+        raw_latest_output_path,
+        cleaned_dated_output_path,
+        cleaned_latest_output_path,
+    ) = save_endpoint_outputs(
         raw_text=raw_text,
         decoded_payload=decoded_payload,
         decoded_rows=decoded_rows,
         dataset_dir=module.DATASET_DIR,
+        cleaned_row_transform=task["cleaned_row_transform"],
     )
 
     print(f"[{task_name}] HTTP {status_code}")
-    print(f"[{task_name}] Saved raw response to {raw_output_path}")
-    print(f"[{task_name}] Saved cleaned response to {latest_output_path}")
+    print(f"[{task_name}] Saved raw response to {raw_dated_output_path}")
+    print(f"[{task_name}] Saved latest raw response to {raw_latest_output_path}")
+    print(f"[{task_name}] Saved cleaned response to {cleaned_dated_output_path}")
+    print(f"[{task_name}] Saved latest cleaned response to {cleaned_latest_output_path}")
     logger.info("Completed %s", task["label"])
 
 
