@@ -3,6 +3,7 @@ import gzip
 import json
 import os
 import re
+from collections import Counter
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -72,6 +73,22 @@ def build_fund_index(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return index
 
 
+def count_funds_by_scheme(rows: list[dict[str, Any]]) -> Counter[str]:
+    counts: Counter[str] = Counter()
+    for row in rows:
+        scheme_name = row.get("SCHEME_NAME") or "(missing scheme name)"
+        counts[scheme_name] += 1
+    return counts
+
+
+def format_scheme_count_lines(rows: list[dict[str, Any]]) -> list[str]:
+    scheme_counts = count_funds_by_scheme(rows)
+    lines = [f"Latest scheme counts: {len(scheme_counts)} schemes"]
+    for scheme_name, count in sorted(scheme_counts.items(), key=lambda item: (-item[1], item[0])):
+        lines.append(f"- {scheme_name}: {count}")
+    return lines
+
+
 def format_fund_lines(fund_ids: list[str], fund_index: dict[str, dict[str, Any]], label: str) -> list[str]:
     if not fund_ids:
         return [f"{label}: none"]
@@ -100,15 +117,15 @@ def build_report_text(dataset_dir: Path) -> str:
     run_date = date.today().isoformat()
 
     if previous_path is None:
-        return "\n".join(
-            [
-                f"MPFA constituent funds daily check ({run_date})",
-                f"Current revision date: {current_revision_date}",
-                f"Current total funds: {current_total}",
-                "Previous dated snapshot: not found",
-                "Result: baseline run only, no day-over-day comparison available yet.",
-            ]
-        )
+        lines = [
+            f"MPFA constituent funds daily check ({run_date})",
+            f"Current revision date: {current_revision_date}",
+            f"Current total funds: {current_total}",
+            "Previous dated snapshot: not found",
+            "Result: baseline run only, no day-over-day comparison available yet.",
+        ]
+        lines.extend(format_scheme_count_lines(current_rows))
+        return "\n".join(lines)
 
     previous_payload = load_gzip_json(previous_path)
     previous_revision_date = previous_payload["revision_date"]
@@ -132,6 +149,7 @@ def build_report_text(dataset_dir: Path) -> str:
 
     if not added_ids and not removed_ids:
         summary.append("Result: no constituent fund changes detected.")
+        summary.extend(format_scheme_count_lines(current_rows))
         return "\n".join(summary)
 
     if current_total != previous_total:
@@ -139,6 +157,7 @@ def build_report_text(dataset_dir: Path) -> str:
     else:
         summary.append("Result: total fund count is unchanged, but the constituent fund set changed.")
 
+    summary.extend(format_scheme_count_lines(current_rows))
     summary.extend(format_fund_lines(added_ids, current_index, "Added funds"))
     summary.extend(format_fund_lines(removed_ids, previous_index, "Removed funds"))
     return "\n".join(summary)
