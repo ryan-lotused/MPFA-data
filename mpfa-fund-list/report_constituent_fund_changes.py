@@ -142,6 +142,7 @@ def build_report_text(dataset_dir: Path) -> str:
     previous_ids = set(previous_index)
     added_ids = sorted(current_ids - previous_ids)
     removed_ids = sorted(previous_ids - current_ids)
+    change_total = current_total - previous_total
 
     summary = [
         f"強積金成分基金日報 {run_date}",
@@ -149,7 +150,8 @@ def build_report_text(dataset_dir: Path) -> str:
         f"前次修訂: {previous_revision_date}",
         f"最新基金數: {current_total}",
         f"前次基金數: {previous_total}",
-        f"變動: {current_total - previous_total:+d}",
+        f"*** 變動 {change_total:+d} ***",
+        f"新增/移除: +{len(added_ids)} / -{len(removed_ids)}",
     ]
 
     if not added_ids and not removed_ids:
