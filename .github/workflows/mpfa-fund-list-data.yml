@@ -18,6 +18,28 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Restore Existing Data Branch Artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin data || true
+
+          if ! git ls-remote --exit-code --heads origin data >/dev/null 2>&1; then
+            echo "No existing data branch found. Starting with a fresh data directory."
+            exit 0
+          fi
+
+          RESTORE_DIR="$(mktemp -d)"
+          git worktree add "$RESTORE_DIR" origin/data
+
+          mkdir -p "$GITHUB_WORKSPACE/mpfa-fund-list/data"
+          if [ -d "$RESTORE_DIR/mpfa-fund-list/data" ]; then
+            cp -R "$RESTORE_DIR/mpfa-fund-list/data/." "$GITHUB_WORKSPACE/mpfa-fund-list/data/"
+          fi
+
+          git worktree remove "$RESTORE_DIR" --force
+
       - name: Set Up Python
         uses: actions/setup-python@v5
         with:
@@ -32,6 +54,12 @@ jobs:
       - name: Run MPFA Data Fetchers
         working-directory: mpfa-fund-list
         run: python main.py
+
+      - name: Report Constituent Fund Changes To Google Chat
+        working-directory: mpfa-fund-list
+        env:
+          GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+        run: python report_constituent_fund_changes.py
 
       - name: Publish Data Branch
         shell: bash

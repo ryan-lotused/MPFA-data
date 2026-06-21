@@ -57,7 +57,12 @@ async def main() -> int:
         logger=logger,
     )
 
-    raw_output_path, latest_output_path = save_endpoint_outputs(
+    (
+        raw_dated_output_path,
+        raw_latest_output_path,
+        cleaned_dated_output_path,
+        cleaned_latest_output_path,
+    ) = save_endpoint_outputs(
         raw_text=raw_text,
         decoded_payload=decoded_payload,
         decoded_rows=decoded_rows,
@@ -69,8 +74,10 @@ async def main() -> int:
 
     print(f"Fetched API response successfully with HTTP {status_code}.")
     print(f"Response body length: {len(raw_text)} characters")
-    print(f"Saved raw response to {raw_output_path}")
-    print(f"Saved cleaned response to {latest_output_path}")
+    print(f"Saved raw response to {raw_dated_output_path}")
+    print(f"Saved latest raw response to {raw_latest_output_path}")
+    print(f"Saved cleaned response to {cleaned_dated_output_path}")
+    print(f"Saved latest cleaned response to {cleaned_latest_output_path}")
 
     if not args.output:
         print(raw_text)

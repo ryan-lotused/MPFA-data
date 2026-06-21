@@ -4,6 +4,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Any
+from typing import Callable
 
 import requests
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
@@ -313,16 +314,30 @@ def save_endpoint_outputs(
     decoded_payload: dict[str, Any],
     decoded_rows: list[dict[str, Any]],
     dataset_dir: Path,
-) -> tuple[Path, Path]:
+    cleaned_row_transform: Callable[[list[dict[str, Any]]], list[dict[str, Any]]] | None = None,
+) -> tuple[Path, Path, Path, Path]:
     revision_date = parse_revision_date(decoded_payload["revision_date"])
-    raw_output_path = dataset_dir / f"{revision_date}.json.gz"
-    latest_output_path = dataset_dir / "latest.json.gz"
+    raw_dated_output_path = dataset_dir / f"{revision_date}_raw.json.gz"
+    raw_latest_output_path = dataset_dir / "latest_raw.json.gz"
+    cleaned_dated_output_path = dataset_dir / f"{revision_date}.json.gz"
+    cleaned_latest_output_path = dataset_dir / "latest.json.gz"
 
     cleaned_payload = dict(decoded_payload)
     cleaned_payload["total"] = int(cleaned_payload["total"])
     cleaned_payload["revision_date"] = revision_date
-    cleaned_payload["data"] = decoded_rows
+    cleaned_payload["data"] = (
+        cleaned_row_transform(decoded_rows)
+        if cleaned_row_transform is not None
+        else decoded_rows
+    )
 
-    write_gzip_text(raw_output_path, raw_text)
-    write_gzip_json(latest_output_path, cleaned_payload)
-    return raw_output_path, latest_output_path
+    write_gzip_text(raw_dated_output_path, raw_text)
+    write_gzip_text(raw_latest_output_path, raw_text)
+    write_gzip_json(cleaned_dated_output_path, cleaned_payload)
+    write_gzip_json(cleaned_latest_output_path, cleaned_payload)
+    return (
+        raw_dated_output_path,
+        raw_latest_output_path,
+        cleaned_dated_output_path,
+        cleaned_latest_output_path,
+    )
