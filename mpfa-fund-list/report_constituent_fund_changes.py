@@ -73,17 +73,24 @@ def build_fund_index(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return index
 
 
+def get_scheme_label(row: dict[str, Any]) -> str:
+    return row.get("SCHEME_NAME_TC") or row.get("SCHEME_NAME") or "(計劃名稱缺失)"
+
+
+def get_fund_label(row: dict[str, Any]) -> str:
+    return row.get("FUND_NAME_TC") or row.get("FUND_NAME") or "(基金名稱缺失)"
+
+
 def count_funds_by_scheme(rows: list[dict[str, Any]]) -> Counter[str]:
     counts: Counter[str] = Counter()
     for row in rows:
-        scheme_name = row.get("SCHEME_NAME") or "(missing scheme name)"
-        counts[scheme_name] += 1
+        counts[get_scheme_label(row)] += 1
     return counts
 
 
 def format_scheme_count_lines(rows: list[dict[str, Any]]) -> list[str]:
     scheme_counts = count_funds_by_scheme(rows)
-    lines = [f"Latest scheme counts: {len(scheme_counts)} schemes"]
+    lines = [f"各計劃基金數: {len(scheme_counts)}"]
     for scheme_name, count in sorted(scheme_counts.items(), key=lambda item: (-item[1], item[0])):
         lines.append(f"- {scheme_name}: {count}")
     return lines
@@ -91,14 +98,12 @@ def format_scheme_count_lines(rows: list[dict[str, Any]]) -> list[str]:
 
 def format_fund_lines(fund_ids: list[str], fund_index: dict[str, dict[str, Any]], label: str) -> list[str]:
     if not fund_ids:
-        return [f"{label}: none"]
+        return [f"{label}: 無"]
 
     lines = [f"{label}: {len(fund_ids)}"]
     for fund_id in fund_ids:
         row = fund_index.get(fund_id, {})
-        fund_name = row.get("FUND_NAME") or "(missing fund name)"
-        scheme_name = row.get("SCHEME_NAME") or "(missing scheme name)"
-        lines.append(f"- {fund_id}: {fund_name} | {scheme_name}")
+        lines.append(f"- {fund_id}: {get_fund_label(row)} | {get_scheme_label(row)}")
     return lines
 
 
@@ -118,11 +123,11 @@ def build_report_text(dataset_dir: Path) -> str:
 
     if previous_path is None:
         lines = [
-            f"MPFA constituent funds daily check ({run_date})",
-            f"Current revision date: {current_revision_date}",
-            f"Current total funds: {current_total}",
-            "Previous dated snapshot: not found",
-            "Result: baseline run only, no day-over-day comparison available yet.",
+            f"強積金成分基金日報 {run_date}",
+            f"最新修訂: {current_revision_date}",
+            f"基金總數: {current_total}",
+            "前次快照: 無",
+            "結果: 首次基線，未有日對日比較。",
         ]
         lines.extend(format_scheme_count_lines(current_rows))
         return "\n".join(lines)
@@ -139,27 +144,27 @@ def build_report_text(dataset_dir: Path) -> str:
     removed_ids = sorted(previous_ids - current_ids)
 
     summary = [
-        f"MPFA constituent funds daily check ({run_date})",
-        f"Current revision date: {current_revision_date}",
-        f"Previous revision date: {previous_revision_date}",
-        f"Current total funds: {current_total}",
-        f"Previous total funds: {previous_total}",
-        f"Net change: {current_total - previous_total:+d}",
+        f"強積金成分基金日報 {run_date}",
+        f"最新修訂: {current_revision_date}",
+        f"前次修訂: {previous_revision_date}",
+        f"最新基金數: {current_total}",
+        f"前次基金數: {previous_total}",
+        f"變動: {current_total - previous_total:+d}",
     ]
 
     if not added_ids and not removed_ids:
-        summary.append("Result: no constituent fund changes detected.")
+        summary.append("結果: 無基金變動。")
         summary.extend(format_scheme_count_lines(current_rows))
         return "\n".join(summary)
 
     if current_total != previous_total:
-        summary.append("Result: total fund count changed.")
+        summary.append("結果: 基金總數有變。")
     else:
-        summary.append("Result: total fund count is unchanged, but the constituent fund set changed.")
+        summary.append("結果: 基金總數不變，但基金清單有變。")
 
     summary.extend(format_scheme_count_lines(current_rows))
-    summary.extend(format_fund_lines(added_ids, current_index, "Added funds"))
-    summary.extend(format_fund_lines(removed_ids, previous_index, "Removed funds"))
+    summary.extend(format_fund_lines(added_ids, current_index, "新增"))
+    summary.extend(format_fund_lines(removed_ids, previous_index, "移除"))
     return "\n".join(summary)
 
 
