@@ -31,13 +31,13 @@ Workflow: [.github/workflows/mpfa-fund-list-data.yml](D:\Workspace\BlockAM\repo\
 
 `main.py` is designed to run in GitHub Actions. The workflow:
 
-- restores the existing `data` branch into `mpfa-fund-list/data/` before each run
+- uses the repository checkout on `main` as the source of prior snapshots before each run
 - installs Python dependencies and Playwright Chromium
 - runs all MPFA fund-list tasks
 - compares the latest constituent-funds snapshot with the previous dated snapshot
 - posts a Google Chat report for every run using the `GOOGLE_CHAT_WEBHOOK_URL` secret
-- keeps generated `mpfa-fund-list/data/` out of the main branch
-- publishes the generated data to the `data` branch instead
+- commits refreshed `mpfa-fund-list/data/` artifacts back to `main` when they change
+- pushes the updated repository state back to `main`
 
 Generated runtime files under `mpfa-fund-list/data/`, `mpfa-fund-list/output/`, and `mpfa-fund-list/__pycache__/` are ignored on the main branch.
 
