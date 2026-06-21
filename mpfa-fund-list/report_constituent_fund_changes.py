@@ -123,7 +123,7 @@ def build_report_text(dataset_dir: Path) -> str:
 
     if previous_path is None:
         lines = [
-            f"強積金成分基金日報 {run_date}",
+            f"MPFA 成分基金日報 {run_date}",
             f"最新修訂: {current_revision_date}",
             f"基金總數: {current_total}",
             "前次快照: 無",
@@ -145,7 +145,7 @@ def build_report_text(dataset_dir: Path) -> str:
     change_total = current_total - previous_total
 
     summary = [
-        f"強積金成分基金日報 {run_date}",
+        f"MPFA 成分基金日報 {run_date}",
         f"最新修訂: {current_revision_date}",
         f"前次修訂: {previous_revision_date}",
         f"最新基金數: {current_total}",
