@@ -36,7 +36,7 @@ jobs:
       - name: Report Constituent Fund Changes To Google Chat
         working-directory: mpfa-fund-list
         env:
-          GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+          GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL || vars.GOOGLE_CHAT_WEBHOOK_URL }}
         run: python report_constituent_fund_changes.py
 
       - name: Commit And Push Updated Data To Main
